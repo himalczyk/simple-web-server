@@ -1,13 +1,16 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"regexp"
+	"strings"
 )
 
-var validPath = regexp.MustCompile("^/(edit|save|view|delete)/([a-zA-Z0-9]+)$")
+var validPath = regexp.MustCompile("^/(edit|save|view|delete|list)/([a-zA-Z0-9]+)$")
 
 func loadPage(title string) (*Page, error) {
 	filename := title + ".txt"
@@ -24,9 +27,15 @@ func renderTemplate(w http.ResponseWriter, tmpl string, p *Page) {
 	defer log.Println("Rendered page", tmpl)
     err := templates.ExecuteTemplate(w, tmpl+".html", p)
     if err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
+		if strings.Contains(err.Error(), "no template") {
+			errorString := fmt.Sprintf("Template: %v not registered in templates %v", tmpl+".html", templates.DefinedTemplates())
+			http.Error(w, errorString, http.StatusInternalServerError)
+		} else {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
     }
 }
+
 
 func makeHandler(fn func (http.ResponseWriter, *http.Request, string)) http.HandlerFunc {
     return func(w http.ResponseWriter, r *http.Request) {
@@ -77,3 +86,31 @@ func deleteHandler(w http.ResponseWriter, r *http.Request, title string) {
 	}
 	http.Redirect(w, r, "/view/"+title, http.StatusNotFound)
 }
+
+func listHandler(w http.ResponseWriter, r *http.Request) {
+	txtFiles, err := findTxtFiles(".")
+	if err != nil {
+		return
+	}
+	p := &Page{FileList: txtFiles}
+	log.Println(txtFiles)
+	renderTemplate(w, "list", p)
+}
+
+func findTxtFiles(dir string) ([]string, error) {
+	var txtFiles []string
+
+	err := filepath.WalkDir(dir, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if !d.IsDir() && filepath.Ext(d.Name()) == ".txt" {
+			txtFiles = append(txtFiles, path)
+		}
+		return nil
+	})
+
+	return txtFiles, err
+}
+
+

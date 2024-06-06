@@ -8,6 +8,7 @@ import (
 type Page struct {
 	Title string
 	Body []byte
+	FileList []string
 }
 
 func (p *Page) save() error {
