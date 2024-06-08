@@ -1,1 +1,15 @@
-<div>{{.FileList}}</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>File List</title>
+</head>
+<body>
+    <div>
+        {{range .FileList}}
+            <div>{{.}}</div>
+            <p>[<a href="/edit/{{.}}">edit</a>]</p>
+        {{end}}
+    </div>
+</body>
+</html>

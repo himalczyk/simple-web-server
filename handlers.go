@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-var validPath = regexp.MustCompile("^/(edit|save|view|delete|list)/([a-zA-Z0-9]+)$")
+var validPath = regexp.MustCompile("^/(edit|save|view|delete)/([a-zA-Z0-9]+)$")
 
 func loadPage(title string) (*Page, error) {
 	filename := title + ".txt"
@@ -105,7 +105,8 @@ func findTxtFiles(dir string) ([]string, error) {
 			return err
 		}
 		if !d.IsDir() && filepath.Ext(d.Name()) == ".txt" {
-			txtFiles = append(txtFiles, path)
+			fileName := strings.Split(path, ".")[0]
+			txtFiles = append(txtFiles, fileName)
 		}
 		return nil
 	})
@@ -114,3 +115,7 @@ func findTxtFiles(dir string) ([]string, error) {
 }
 
 
+func authHandler(w http.ResponseWriter, r *http.Request) {
+	p := &Page{Title: "Login"}
+	renderTemplate(w, "auth", p)
+}
