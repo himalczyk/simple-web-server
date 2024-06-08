@@ -119,3 +119,19 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 	p := &Page{Title: "Login"}
 	renderTemplate(w, "auth", p)
 }
+
+func loginHandler(w http.ResponseWriter, r *http.Request) {
+	// handle auth here as the coming in username in password is here
+    // Parse form data
+    username := r.FormValue("username")
+    password := r.FormValue("password")
+
+	// add here checking in db if account exists and his password is correct
+
+    // For demonstration, we'll just print the credentials to the console
+    // In a real application, you should verify the credentials
+    fmt.Printf("Username: %s, Password: %s\n", username, password)
+
+    // Redirect to a success page or display a message
+    fmt.Fprintf(w, "Login successful!")
+}

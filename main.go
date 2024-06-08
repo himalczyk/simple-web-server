@@ -11,6 +11,7 @@ var templates = template.Must(template.ParseFiles("edit.html", "view.html", "lis
 func main() {
 	log.Print("Starting to listen on port 8888")
 	http.HandleFunc("/auth/", authHandler)
+	http.HandleFunc("/login/", loginHandler)
     http.HandleFunc("/view/", makeHandler(viewHandler))
     http.HandleFunc("/edit/", makeHandler(editHandler))
     http.HandleFunc("/save/", makeHandler(saveHandler))
