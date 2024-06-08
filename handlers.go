@@ -12,9 +12,11 @@ import (
 
 var validPath = regexp.MustCompile("^/(edit|save|view|delete)/([a-zA-Z0-9]+)$")
 
+var path string = "./files/"
+
 func loadPage(title string) (*Page, error) {
 	filename := title + ".txt"
-	body, err := os.ReadFile(filename)
+	body, err := os.ReadFile(path + filename)
 	if err != nil {
 		return nil, err
 	}
@@ -84,6 +86,7 @@ func deleteHandler(w http.ResponseWriter, r *http.Request, title string) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	// TODO: Redirect to change to something../ else, some homepage then
 	http.Redirect(w, r, "/view/"+title, http.StatusNotFound)
 }
 

@@ -6,7 +6,7 @@ import (
 	"text/template"
 )
 
-var templates = template.Must(template.ParseFiles("edit.html", "view.html", "list.html", "auth.html"))
+var templates = template.Must(template.ParseFiles("templates/edit.html", "templates/view.html", "templates/list.html", "templates/auth.html"))
 
 func main() {
 	log.Print("Starting to listen on port 8888")

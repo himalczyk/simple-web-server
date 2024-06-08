@@ -17,7 +17,7 @@ func (p *Page) save() error {
 }
 
 func delete(title string) error {
-	filename := title + ".txt"
+	filename := path + title + ".txt"
 	defer log.Printf("Deleted file %s", filename)
 	return os.Remove(filename)
 }
