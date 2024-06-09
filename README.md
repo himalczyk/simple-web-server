@@ -3,7 +3,8 @@
 Learning http web in Golang :)
 
 So far worked on:
-- CRUD operations and http Handlers
+- http server
+- CRUD operations with httpHandlers and more
 - templating
 - auth (Work In Progress)
 

@@ -50,6 +50,11 @@ func makeHandler(fn func (http.ResponseWriter, *http.Request, string)) http.Hand
     }
 }
 
+func indexHandler(w http.ResponseWriter, r *http.Request) {
+	p := &Page{Title: "Index"}
+	renderTemplate(w, "index", p)
+}
+
 func viewHandler(w http.ResponseWriter, r *http.Request, title string) {
 	p, err := loadPage(title)
 	if err != nil {
@@ -86,8 +91,7 @@ func deleteHandler(w http.ResponseWriter, r *http.Request, title string) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	// TODO: Redirect to change to something../ else, some homepage then
-	http.Redirect(w, r, "/view/"+title, http.StatusNotFound)
+	http.Redirect(w, r, "/list/", http.StatusOK)
 }
 
 func listHandler(w http.ResponseWriter, r *http.Request) {
@@ -109,6 +113,7 @@ func findTxtFiles(dir string) ([]string, error) {
 		}
 		if !d.IsDir() && filepath.Ext(d.Name()) == ".txt" {
 			fileName := strings.Split(path, ".")[0]
+			fileName = strings.Split(fileName, "/")[1]
 			txtFiles = append(txtFiles, fileName)
 		}
 		return nil
@@ -124,17 +129,31 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
-	// handle auth here as the coming in username in password is here
-    // Parse form data
-    username := r.FormValue("username")
-    password := r.FormValue("password")
+	AuthData := AuthData{
+        Username:       r.FormValue("username"),
+        Password:       r.FormValue("password"),
+    }
+	log.Println(AuthData)
 
 	// add here checking in db if account exists and his password is correct
-
-    // For demonstration, we'll just print the credentials to the console
-    // In a real application, you should verify the credentials
-    fmt.Printf("Username: %s, Password: %s\n", username, password)
-
     // Redirect to a success page or display a message
-    fmt.Fprintf(w, "Login successful!")
+	// errors etc.
+}
+
+func registerHandler(w http.ResponseWriter, r *http.Request) {
+	p := &Page{Title: "Register"}
+	renderTemplate(w, "register", p)
+}
+
+func registerProcessHandler(w http.ResponseWriter, r *http.Request) {
+	registerData := RegisterData{
+        Username:       r.FormValue("username"),
+        Password:       r.FormValue("password"),
+        Email:          r.FormValue("email"),
+        FavoritePokemon: r.FormValue("favoritePokemon"),
+    }
+	// add here saving to db for account creation
+	// Redirect to a success page, errors etc.
+	fmt.Fprintf(w, "Form Data: %+v\n", registerData)
+	fmt.Fprintf(w, "Register successful!")
 }
