@@ -1,6 +1,6 @@
-module github.com/himalczyk/simple-web-server
+module github.com/himalczyk/simple-web-server/db
 
-require github.com/himalczyk/simple-web-server/db v0.0.0
+go 1.21.4
 
 require (
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
@@ -15,7 +15,3 @@ require (
 	golang.org/x/crypto v0.20.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 )
-
-replace github.com/himalczyk/simple-web-server/db => ./db
-
-go 1.21.4
