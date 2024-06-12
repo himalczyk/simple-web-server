@@ -129,7 +129,7 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
-	AuthData := AuthData{
+	AuthData := &AuthData{
         Username:       r.FormValue("username"),
         Password:       r.FormValue("password"),
     }
@@ -146,12 +146,13 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func registerProcessHandler(w http.ResponseWriter, r *http.Request) {
-	registerData := RegisterData{
+	registerData := &RegisterData{
         Username:       r.FormValue("username"),
         Password:       r.FormValue("password"),
         Email:          r.FormValue("email"),
         FavoritePokemon: r.FormValue("favoritePokemon"),
     }
+	log.Println(registerData)
 	// add here saving to db for account creation
 	// Redirect to a success page, errors etc.
 	fmt.Fprintf(w, "Form Data: %+v\n", registerData)
