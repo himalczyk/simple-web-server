@@ -8,24 +8,32 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/himalczyk/simple-web-server/models"
 )
 
 var validPath = regexp.MustCompile("^/(edit|save|view|delete)/([a-zA-Z0-9]+)$")
 
 var path string = "./files/"
 
-func loadPage(title string) (*Page, error) {
+func delete(title string) error {
+	filename := path + title + ".txt"
+	defer log.Printf("Deleted file %s", filename)
+	return os.Remove(filename)
+}
+
+func loadPage(title string) (*models.Page, error) {
 	filename := title + ".txt"
 	body, err := os.ReadFile(path + filename)
 	if err != nil {
 		return nil, err
 	}
 	log.Printf("Loaded file %s", filename)
-	return &Page{Title: title, Body: body}, nil
+	return &models.Page{Title: title, Body: body}, nil
 }
 
 
-func renderTemplate(w http.ResponseWriter, tmpl string, p *Page) {
+func renderTemplate(w http.ResponseWriter, tmpl string, p *models.Page) {
 	defer log.Println("Rendered page", tmpl)
     err := templates.ExecuteTemplate(w, tmpl+".html", p)
     if err != nil {
@@ -51,7 +59,7 @@ func makeHandler(fn func (http.ResponseWriter, *http.Request, string)) http.Hand
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
-	p := &Page{Title: "Index"}
+	p := &models.Page{Title: "Index"}
 	renderTemplate(w, "index", p)
 }
 
@@ -67,7 +75,7 @@ func viewHandler(w http.ResponseWriter, r *http.Request, title string) {
 
 func saveHandler(w http.ResponseWriter, r *http.Request, title string) {
 	body := r.FormValue("body")
-	p := &Page{Title: title, Body: []byte(body)}
+	p := &models.Page{Title: title, Body: []byte(body)}
 	err := p.save()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -79,7 +87,7 @@ func saveHandler(w http.ResponseWriter, r *http.Request, title string) {
 func editHandler(w http.ResponseWriter, r *http.Request, title string) {
 	p, err := loadPage(title)
 	if err != nil {
-		p = &Page{Title: title}
+		p = &models.Page{Title: title}
 	}
 	renderTemplate(w, "edit", p)
 }
@@ -99,7 +107,7 @@ func listHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-	p := &Page{FileList: txtFiles}
+	p := &models.Page{FileList: txtFiles}
 	log.Println(txtFiles)
 	renderTemplate(w, "list", p)
 }
@@ -124,12 +132,12 @@ func findTxtFiles(dir string) ([]string, error) {
 
 
 func authHandler(w http.ResponseWriter, r *http.Request) {
-	p := &Page{Title: "Login"}
+	p := &models.Page{Title: "Login"}
 	renderTemplate(w, "auth", p)
 }
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
-	AuthData := &AuthData{
+	AuthData := &models.AuthData{
         Username:       r.FormValue("username"),
         Password:       r.FormValue("password"),
     }
@@ -141,12 +149,12 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func registerHandler(w http.ResponseWriter, r *http.Request) {
-	p := &Page{Title: "Register"}
+	p := &models.Page{Title: "Register"}
 	renderTemplate(w, "register", p)
 }
 
 func registerProcessHandler(w http.ResponseWriter, r *http.Request) {
-	registerData := &RegisterData{
+	registerData := &models.RegisterData{
         Username:       r.FormValue("username"),
         Password:       r.FormValue("password"),
         Email:          r.FormValue("email"),

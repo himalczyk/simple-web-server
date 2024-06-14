@@ -2,48 +2,35 @@ package db
 
 import (
 	"context"
-	"fmt"
-	"log"
-	"os"
 
-	"github.com/jackc/pgx/v4"
-	"github.com/joho/godotenv"
+	"github.com/himalczyk/simple-web-server/models"
+	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 // DB holds the database connection pool.
-var DB *pgx.Conn
-
-func Connect(ctx context.Context) {
-    err := godotenv.Load()
-    if err != nil {
-        log.Fatalf("Error loading .env file")
-    }
-    dbUser := os.Getenv("DB_USER")
-    dbPassword := os.Getenv("DB_PASSWORD")
-    dbName := os.Getenv("DB_NAME")
-    dbHost := os.Getenv("DB_HOST")
-    dbPort := os.Getenv("DB_PORT")
-
-    connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", dbUser, dbPassword, dbHost, dbPort, dbName)
-    DB, err = pgx.Connect(ctx, connStr)
-    if err != nil {
-        log.Fatalf("Unable to connect to database: %v\n", err)
-    }
+type Client struct {
+    *pgxpool.Pool
 }
 
-func Close(ctx context.Context) {
-    if DB != nil {
-        if err := DB.Close(ctx); err != nil {
-            log.Printf("Error closing database: %v\n", err)
-        }
+func NewClient(ctx context.Context, url string) (*Client, error) {
+    poolConfig, err := pgxpool.ParseConfig(url)
+    if err != nil {
+        return nil, err
     }
+    pool, err := pgxpool.ConnectConfig(ctx, poolConfig)
+    if err != nil {
+        return nil, err
+    }
+    return &Client{pool}, nil
 }
 
-func GetGreeting(ctx context.Context) (string, error) {
-    var greeting string
-    err := DB.QueryRow(ctx, "SELECT 'Hello, world!'").Scan(&greeting)
-    if err != nil {
-        return "", fmt.Errorf("QueryRow failed: %v", err)
-    }
-    return greeting, nil
+func (c *Client) Close() {
+    c.Pool.Close()
+}
+
+
+func (c *Client) RegisterUser(ctx context.Context, userData *models.RegisterData) error {
+    _, err := c.Exec(ctx, "INSERT INTO users (username, password, email, favorite_pokemon) VALUES ($1, $2, $3, $4)",
+        userData.Username, userData.Password, userData.Email, userData.FavoritePokemon)
+    return err
 }

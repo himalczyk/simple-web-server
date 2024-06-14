@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"text/template"
 
 	"github.com/himalczyk/simple-web-server/db"
@@ -14,15 +15,18 @@ var templates = template.Must(template.ParseFiles("templates/edit.html", "templa
 
 func main() {
 	ctx := context.Background()
-	db.Connect(ctx)
-	defer db.DB.Close(ctx)
-	greeting, err := db.GetGreeting(ctx)
-	if err != nil {
-		log.Fatalf("Failed to get greeting: %v\n", err)
-	}
+	dbUser := os.Getenv("DB_USER")
+    dbPassword := os.Getenv("DB_PASSWORD")
+    dbName := os.Getenv("DB_NAME")
+    dbHost := os.Getenv("DB_HOST")
+    dbPort := os.Getenv("DB_PORT")
 
-	fmt.Println(greeting)
-
+    connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", dbUser, dbPassword, dbHost, dbPort, dbName)
+    client, err := db.NewClient(ctx, connStr)
+    if err != nil {
+        log.Fatalf("Failed to connect to database: %v", err)
+    }
+    defer client.Close()
 
 	log.Print("Starting to listen on port 8888")
 	http.HandleFunc("/", indexHandler)

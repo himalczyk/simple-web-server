@@ -1,6 +1,7 @@
 module github.com/himalczyk/simple-web-server
 
 require github.com/himalczyk/simple-web-server/db v0.0.0
+require github.com/himalczyk/simple-web-server/models v0.0.0
 
 require (
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
@@ -11,11 +12,12 @@ require (
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
 	github.com/jackc/pgtype v1.14.0 // indirect
 	github.com/jackc/pgx/v4 v4.18.3 // indirect
-	github.com/joho/godotenv v1.5.1 // indirect
+	github.com/jackc/puddle v1.3.0 // indirect
 	golang.org/x/crypto v0.20.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 )
 
 replace github.com/himalczyk/simple-web-server/db => ./db
+replace github.com/himalczyk/simple-web-server/models => ./models
 
 go 1.21.4
