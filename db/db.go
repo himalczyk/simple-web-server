@@ -1,36 +1,50 @@
 package db
 
 import (
-	"context"
+	"fmt"
+	"log"
+	"os"
+
+	"github.com/joho/godotenv"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 
 	"github.com/himalczyk/simple-web-server/models"
-	"github.com/jackc/pgx/v4/pgxpool"
 )
 
-// DB holds the database connection pool.
-type Client struct {
-    *pgxpool.Pool
+var DB *gorm.DB
+
+func Init() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("Error loading .env file")
+	}
+
+	dbUser := os.Getenv("DB_USER")
+	dbPassword := os.Getenv("DB_PASSWORD")
+	dbName := os.Getenv("DB_NAME")
+	dbHost := os.Getenv("DB_HOST")
+	dbPort := os.Getenv("DB_PORT")
+
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Europe/Warsaw", dbHost, dbUser, dbPassword, dbName, dbPort)
+
+    // newLogger := logger.New(
+	// 	log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
+	// 	logger.Config{
+	// 		SlowThreshold: time.Millisecond, // Log all queries
+	// 		LogLevel:      logger.Info,      // Log level
+	// 		Colorful:      true,             // Disable color
+	// 	},
+	// )
+
+	database, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
+		log.Fatalf("Failed to connect to database: %v", err)
+	}
+
+	DB = database
 }
 
-func NewClient(ctx context.Context, url string) (*Client, error) {
-    poolConfig, err := pgxpool.ParseConfig(url)
-    if err != nil {
-        return nil, err
-    }
-    pool, err := pgxpool.ConnectConfig(ctx, poolConfig)
-    if err != nil {
-        return nil, err
-    }
-    return &Client{pool}, nil
-}
-
-func (c *Client) Close() {
-    c.Pool.Close()
-}
-
-
-func (c *Client) RegisterUser(ctx context.Context, userData *models.RegisterData) error {
-    _, err := c.Exec(ctx, "INSERT INTO users (username, password, email, favorite_pokemon) VALUES ($1, $2, $3, $4)",
-        userData.Username, userData.Password, userData.Email, userData.FavoritePokemon)
-    return err
+func Migrate() {
+	DB.AutoMigrate(&models.User{})
 }

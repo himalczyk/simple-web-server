@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/himalczyk/simple-web-server/db"
 	"github.com/himalczyk/simple-web-server/models"
 )
 
@@ -76,7 +77,7 @@ func viewHandler(w http.ResponseWriter, r *http.Request, title string) {
 func saveHandler(w http.ResponseWriter, r *http.Request, title string) {
 	body := r.FormValue("body")
 	p := &models.Page{Title: title, Body: []byte(body)}
-	err := p.save()
+	err := p.Save()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -154,15 +155,18 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func registerProcessHandler(w http.ResponseWriter, r *http.Request) {
-	registerData := &models.RegisterData{
-        Username:       r.FormValue("username"),
-        Password:       r.FormValue("password"),
-        Email:          r.FormValue("email"),
-        FavoritePokemon: r.FormValue("favoritePokemon"),
-    }
-	log.Println(registerData)
-	// add here saving to db for account creation
-	// Redirect to a success page, errors etc.
-	fmt.Fprintf(w, "Form Data: %+v\n", registerData)
-	fmt.Fprintf(w, "Register successful!")
+	registerData := &models.User{
+		Username:       r.FormValue("username"),
+		Password:       r.FormValue("password"),
+		Email:          r.FormValue("email"),
+		FavoritePokemon: r.FormValue("favoritePokemon"),
+	}
+
+	result := db.DB.Create(&registerData)
+	if result.Error != nil {
+		http.Error(w, "Unable to register user", http.StatusInternalServerError)
+		return
+	}
+	log.Printf("User ID: %d, Username: %s", registerData.ID, registerData.Username)
+	fmt.Fprintf(w, "Register successful! User ID: %d\n", registerData.ID)
 }
