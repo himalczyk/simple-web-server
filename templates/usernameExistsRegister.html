@@ -1,0 +1,15 @@
+<h1>Page {{.Title}}</h1>
+{{if .ErrorMessage}}
+<div style="color:red;">{{.ErrorMessage}}</div>
+{{end}}
+<form action="/register/" method="POST">
+    <label>Username: </label>
+    <input type="text" name="username" value="{{.Username}}"/><br><br>
+    <label>Password: </label>
+    <input type="password" name="password" value="{{.Password}}"/><br><br>
+    <label>Email: </label>
+    <input type="email" name="email" value="{{.Email}}"/><br><br>
+    <label>Favorite Pokemon: </label>
+    <input type="text" name="favoritePokemon" value="{{.FavoritePokemon}}"/><br><br>
+    <div><input type="submit" value="Register"></div>
+</form>

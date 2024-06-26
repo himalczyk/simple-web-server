@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/himalczyk/simple-web-server/db"
 	"github.com/himalczyk/simple-web-server/models"
+	"gorm.io/gorm"
 )
 
 var validPath = regexp.MustCompile("^/(edit|save|view|delete)/([a-zA-Z0-9]+)$")
@@ -34,9 +36,9 @@ func loadPage(title string) (*models.Page, error) {
 }
 
 
-func renderTemplate(w http.ResponseWriter, tmpl string, p *models.Page) {
+func renderTemplate(w http.ResponseWriter, tmpl string, pageData interface{}) {
 	defer log.Println("Rendered page", tmpl)
-    err := templates.ExecuteTemplate(w, tmpl+".html", p)
+    err := templates.ExecuteTemplate(w, tmpl+".html", pageData)
     if err != nil {
 		if strings.Contains(err.Error(), "no template") {
 			errorString := fmt.Sprintf("Template: %v not registered in templates %v", tmpl+".html", templates.DefinedTemplates())
@@ -161,8 +163,46 @@ func registerProcessHandler(w http.ResponseWriter, r *http.Request) {
 		Email:          r.FormValue("email"),
 		FavoritePokemon: r.FormValue("favoritePokemon"),
 	}
+	var user models.User
+	result := db.DB.Where("username = ?", registerData.Username).First(&user)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		log.Println("Username is free")
+		}
+	} else {
+		// User exists, render template with error message
+		data := &models.PageData{
+			Title: "Register",
+			ErrorMessage: "Username already taken. Please choose another.",
+			Username: registerData.Username,
+			Password: r.FormValue("password"),
+			Email: r.FormValue("email"),
+			FavoritePokemon: r.FormValue("favoritePokemon"),
+		}
+		renderTemplate(w, "usernameExistsRegister", data)
+		return
+	}
 
-	result := db.DB.Create(&registerData)
+	result = db.DB.Where("email = ?", registerData.Email).First(&user)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		log.Println("Email is free")
+		}
+	} else {
+		// User exists, render template with error message
+		data := &models.PageData{
+			Title: "Register",
+			ErrorMessage: "Email already taken. Please choose another.",
+			Username: registerData.Username,
+			Password: r.FormValue("password"),
+			Email: registerData.Email,
+			FavoritePokemon: r.FormValue("favoritePokemon"),
+		}
+		renderTemplate(w, "emailExistsRegister", data)
+		return
+	}
+
+	result = db.DB.Create(&registerData)
 	if result.Error != nil {
 		http.Error(w, "Unable to register user", http.StatusInternalServerError)
 		return

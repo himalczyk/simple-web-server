@@ -40,3 +40,12 @@ type User struct {
 	Email          string `gorm:"uniqueIndex;size:255"`
 	FavoritePokemon string
 }
+
+type PageData struct {
+    Title          string
+    ErrorMessage   string
+    Username       string
+    Password       string
+    Email          string
+    FavoritePokemon string
+}

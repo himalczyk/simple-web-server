@@ -8,7 +8,7 @@ import (
 	"github.com/himalczyk/simple-web-server/db"
 )
 
-var templates = template.Must(template.ParseFiles("templates/edit.html", "templates/view.html", "templates/list.html", "templates/auth.html", "templates/register.html", "templates/index.html"))
+var templates = template.Must(template.ParseFiles("templates/edit.html", "templates/view.html", "templates/list.html", "templates/auth.html", "templates/register.html", "templates/index.html", "templates/emailExistsRegister.html", "templates/usernameExistsRegister.html"))
 
 func main() {
 	db.Init()
