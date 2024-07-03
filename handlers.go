@@ -145,10 +145,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
         Password:       r.FormValue("password"),
     }
 	log.Println(authData)
-
-	// add here checking in db if account exists and his password is correct
-    // Redirect to a success page or display a message
-	// errors etc.
+	
 }
 
 func registerHandler(w http.ResponseWriter, r *http.Request) {
