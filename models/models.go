@@ -21,8 +21,8 @@ func (p *Page) Save() error {
 
 
 type AuthData struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+    Username	string `json:"username"`
+    Password	string `json:"password"`
 }
 
 

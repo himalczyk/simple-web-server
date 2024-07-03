@@ -140,11 +140,11 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
-	AuthData := &models.AuthData{
+	authData := &models.AuthData{
         Username:       r.FormValue("username"),
         Password:       r.FormValue("password"),
     }
-	log.Println(AuthData)
+	log.Println(authData)
 
 	// add here checking in db if account exists and his password is correct
     // Redirect to a success page or display a message
@@ -163,6 +163,7 @@ func registerProcessHandler(w http.ResponseWriter, r *http.Request) {
 		Email:          r.FormValue("email"),
 		FavoritePokemon: r.FormValue("favoritePokemon"),
 	}
+	log.Println(registerData)
 	var user models.User
 	result := db.DB.Where("username = ?", registerData.Username).First(&user)
 	if result.Error != nil {
